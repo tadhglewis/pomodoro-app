@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 
+type SoundType = 'complete' | 'warning' | 'tick';
+type TimerMode = 'work' | 'shortBreak' | 'longBreak';
+
 export const useNotifications = () => {
-  const [permission, setPermission] = useState(Notification.permission);
+  const [permission, setPermission] = useState<NotificationPermission>(Notification.permission);
 
   useEffect(() => {
     if (permission === 'default') {
@@ -9,10 +12,10 @@ export const useNotifications = () => {
     }
   }, [permission]);
 
-  const playSound = (type = 'complete') => {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const playSound = (type: SoundType = 'complete'): void => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     
-    const frequencies = {
+    const frequencies: Record<SoundType, number[]> = {
       complete: [523.25, 659.25, 783.99], // C5, E5, G5 chord
       warning: [440, 554.37], // A4, C#5
       tick: [800] // High tick sound
@@ -39,7 +42,7 @@ export const useNotifications = () => {
     });
   };
 
-  const showNotification = (title, body, options = {}) => {
+  const showNotification = (title: string, body: string, options: NotificationOptions = {}): void => {
     if (permission === 'granted') {
       new Notification(title, {
         body,
@@ -50,8 +53,8 @@ export const useNotifications = () => {
     }
   };
 
-  const notifyTimerComplete = (mode) => {
-    const messages = {
+  const notifyTimerComplete = (mode: TimerMode): void => {
+    const messages: Record<TimerMode, { title: string; body: string }> = {
       work: {
         title: '🎉 Great job!',
         body: 'Time for a well-deserved break!'
@@ -71,7 +74,7 @@ export const useNotifications = () => {
     playSound('complete');
   };
 
-  const notifyLastMinute = () => {
+  const notifyLastMinute = (): void => {
     showNotification('⏰ One minute left!', 'Almost there, keep going!');
     playSound('warning');
   };
